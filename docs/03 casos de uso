@@ -1,1 +1,477 @@
+# 03. Especificación de casos de uso
 
+## 1. Introducción
+
+El presente documento describe las interacciones entre los actores y el sistema SteticOnline para representar el funcionamiento de sus principales funcionalidades.
+
+Cada caso de uso define un objetivo específico y detalla las condiciones necesarias para realizar una operación, el flujo principal, los posibles escenarios alternativos y el resultado esperado.
+
+Esta documentación servirá como base para las etapas posteriores de diseño, arquitectura, desarrollo y pruebas del sistema.
+
+## 2. Actores del sistema
+
+- **Cliente:** persona que consulta los servicios, profesionales y disponibilidad, y solicita reservas.
+- **Cliente registrado:** usuario que posee una cuenta y puede gestionar sus propias reservas.
+- **Administrador:** responsable de gestionar turnos, servicios, profesionales, horarios, señas y configuración general.
+- **Profesional:** persona que presta los servicios del centro de estética y tiene una disponibilidad horaria asociada.
+
+## 3. Listado de casos de uso
+
+- CU-01: Consultar servicios.
+- CU-02: Consultar profesionales.
+- CU-03: Consultar disponibilidad.
+- CU-04: Reservar un turno como invitado.
+- CU-05: Reservar un turno como cliente registrado.
+- CU-06: Adjuntar comprobante de seña.
+- CU-07: Consultar próximos turnos e historial.
+- CU-08: Cancelar un turno.
+- CU-09: Gestionar turnos desde el panel administrativo.
+- CU-10: Verificar señas y confirmar reservas.
+- CU-11: Gestionar servicios y profesionales.
+- CU-12: Gestionar horarios disponibles.
+- CU-13: Publicar horarios de último momento.
+
+## 4. Desarrollo de los casos de uso
+
+### CU-01. Consultar servicios
+
+**Actor principal:** Cliente.
+
+**Objetivo:** Permitir que el cliente consulte los servicios ofrecidos por el centro de estética.
+
+**Precondiciones:**
+- El sitio web debe encontrarse disponible.
+- Los servicios deben estar registrados y habilitados.
+
+**Flujo principal:**
+1. El cliente ingresa al sitio web.
+2. Accede a la sección de servicios.
+3. El sistema consulta los servicios habilitados.
+4. El sistema muestra el catálogo de servicios.
+5. El cliente selecciona un servicio.
+6. El sistema muestra su información detallada.
+
+**Información del servicio:**
+- Nombre.
+- Descripción.
+- Imagen ilustrativa.
+- Precio.
+- Duración aproximada.
+- Opción para reservar un turno.
+
+**Flujos alternativos:**
+- FA-01: Si no existen servicios habilitados, el sistema informa que no hay servicios disponibles.
+- FA-02: Si un servicio deja de estar disponible, el sistema informa que ya no se encuentra habilitado.
+
+**Postcondiciones:**
+- El cliente visualiza la información del servicio.
+- No se genera ninguna reserva ni se modifican datos.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-02. Consultar profesionales
+
+**Actor principal:** Cliente.
+
+**Objetivo:** Permitir que el cliente consulte los profesionales disponibles, sus especialidades y los servicios que realizan.
+
+**Precondiciones:**
+- El sitio web debe encontrarse disponible.
+- Los profesionales deben estar registrados y habilitados.
+
+**Flujo principal:**
+1. El cliente ingresa a la sección de profesionales.
+2. El sistema consulta los profesionales habilitados.
+3. El sistema muestra el listado de profesionales.
+4. El cliente selecciona un profesional.
+5. El sistema muestra sus datos, especialidades y servicios asociados.
+6. El cliente puede filtrar los profesionales según el servicio que desea realizar.
+
+**Flujos alternativos:**
+- FA-01: Si no existen profesionales habilitados, el sistema informa que no hay profesionales disponibles.
+- FA-02: Si no existen profesionales asociados al servicio seleccionado, el sistema informa que no hay profesionales para ese servicio.
+
+**Postcondiciones:**
+- El cliente visualiza la información de los profesionales.
+- No se genera ninguna reserva.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-03. Consultar disponibilidad
+
+**Actor principal:** Cliente.
+
+**Objetivo:** Permitir que el cliente consulte los días y horarios disponibles para un servicio y profesional determinados.
+
+**Precondiciones:**
+- El servicio debe estar habilitado.
+- El profesional debe estar habilitado y asociado al servicio.
+- Deben existir horarios configurados.
+
+**Flujo principal:**
+1. El cliente selecciona un servicio.
+2. Selecciona un profesional.
+3. El sistema muestra un calendario con los días disponibles.
+4. El cliente selecciona una fecha.
+5. El sistema consulta la disponibilidad para ese servicio, profesional y fecha.
+6. El sistema muestra los horarios disponibles.
+7. El cliente selecciona un horario para continuar con la reserva.
+
+**Flujos alternativos:**
+- FA-01: Si no existen horarios disponibles, el sistema informa la situación.
+- FA-02: Si el profesional no tiene disponibilidad para el servicio, el sistema informa que no hay horarios.
+- FA-03: Si un horario deja de estar disponible antes de completar la reserva, el sistema informa que ya fue ocupado.
+
+**Postcondiciones:**
+- El cliente visualiza los horarios disponibles.
+- El horario seleccionado queda identificado para continuar con la reserva, pero todavía no se confirma.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-04. Reservar un turno como invitado
+
+**Actor principal:** Cliente.
+
+**Objetivo:** Permitir que una persona solicite un turno sin necesidad de registrarse o iniciar sesión.
+
+**Precondiciones:**
+- El servicio debe estar habilitado.
+- El profesional debe estar disponible para el servicio.
+- El horario seleccionado debe encontrarse disponible.
+- El cliente debe proporcionar sus datos de contacto.
+
+**Flujo principal:**
+1. El cliente selecciona un servicio.
+2. Selecciona un profesional.
+3. Selecciona una fecha y un horario disponible.
+4. El sistema solicita los datos necesarios para la reserva.
+5. El cliente completa sus datos de contacto.
+6. El sistema valida la información ingresada.
+7. El sistema verifica nuevamente la disponibilidad.
+8. El sistema registra la reserva.
+9. Si no se requiere seña, el sistema confirma automáticamente el turno.
+10. Si se requiere seña, el sistema genera una reserva provisional y muestra los datos de pago y el plazo de 30 minutos para adjuntar el comprobante.
+
+**Flujos alternativos:**
+- FA-01: Si los datos son incorrectos o están incompletos, el sistema solicita corregirlos.
+- FA-02: Si el horario fue ocupado por otro cliente, el sistema informa que ya no está disponible.
+- FA-03: Si se requiere una seña, el cliente deberá realizar el pago y adjuntar el comprobante dentro del plazo establecido.
+- FA-04: Si no se recibe el comprobante dentro de los 30 minutos, la reserva provisional vence y el horario se libera.
+
+**Postcondiciones:**
+- Si no se requiere seña, el turno queda confirmado.
+- Si se requiere seña, el turno queda provisional hasta recibir y verificar el comprobante.
+- Los datos de la reserva quedan registrados.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-05. Reservar un turno como cliente registrado
+
+**Actor principal:** Cliente registrado.
+
+**Objetivo:** Permitir que un cliente con cuenta reserve un turno utilizando sus datos previamente registrados.
+
+**Precondiciones:**
+- El cliente debe haber iniciado sesión.
+- Debe existir un servicio y profesional habilitados.
+- Debe haber disponibilidad horaria.
+
+**Flujo principal:**
+1. El cliente ingresa a su cuenta.
+2. Selecciona el servicio y el profesional.
+3. Consulta el calendario y selecciona una fecha y horario.
+4. El sistema recupera los datos de contacto del cliente.
+5. El cliente verifica sus datos y confirma la solicitud.
+6. El sistema valida nuevamente la disponibilidad.
+7. El sistema registra la reserva y aplica las reglas de señas correspondientes.
+
+**Flujos alternativos:**
+- FA-01: Si los datos de contacto están incompletos, el sistema solicita actualizarlos.
+- FA-02: Si el horario ya no está disponible, el sistema solicita seleccionar otro.
+- FA-03: Si se requiere una seña, la reserva queda provisional hasta recibir y verificar el comprobante.
+
+**Postcondiciones:**
+- La reserva queda registrada con el estado correspondiente.
+- El turno queda asociado a la cuenta del cliente.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-06. Adjuntar comprobante de seña
+
+**Actor principal:** Cliente.
+
+**Objetivo:** Permitir que el cliente envíe el comprobante de transferencia correspondiente a una reserva provisional.
+
+**Precondiciones:**
+- Debe existir una reserva provisional.
+- La reserva debe encontrarse dentro del plazo de 30 minutos.
+- El cliente debe disponer del comprobante de pago.
+
+**Flujo principal:**
+1. El cliente accede a las instrucciones de pago de su reserva.
+2. Realiza la transferencia.
+3. Selecciona la opción para adjuntar el comprobante.
+4. El sistema valida el archivo recibido.
+5. El sistema registra el comprobante.
+6. La reserva pasa al estado pendiente de verificación.
+7. El sistema informa que el comprobante fue recibido.
+
+**Flujos alternativos:**
+- FA-01: Si el archivo no cumple con el formato o tamaño permitido, el sistema solicita otro archivo.
+- FA-02: Si venció el plazo de 30 minutos, el sistema informa que la reserva fue liberada.
+- FA-03: Si ya se envió un comprobante, el sistema informa que se encuentra pendiente de verificación.
+
+**Postcondiciones:**
+- El comprobante queda asociado a la reserva.
+- La reserva permanece retenida hasta la verificación del pago.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-07. Consultar próximos turnos e historial
+
+**Actor principal:** Cliente registrado.
+
+**Objetivo:** Permitir que el cliente consulte sus próximas reservas y los turnos realizados anteriormente.
+
+**Precondiciones:**
+- El cliente debe estar registrado.
+- Debe haber iniciado sesión.
+
+**Flujo principal:**
+1. El cliente ingresa a su cuenta.
+2. Accede a la sección Mis turnos.
+3. El sistema consulta las reservas asociadas a su cuenta.
+4. El sistema muestra los próximos turnos y el historial.
+5. El cliente selecciona una reserva para consultar sus detalles.
+
+**Flujos alternativos:**
+- FA-01: Si el cliente no tiene reservas, el sistema muestra un mensaje informativo.
+- FA-02: Si no se puede recuperar la información, el sistema informa que ocurrió un error.
+
+**Postcondiciones:**
+- El cliente visualiza únicamente sus propias reservas.
+- No se modifican los datos de los turnos.
+
+**Prioridad:** Media.
+
+---
+
+### CU-08. Cancelar un turno
+
+**Actor principal:** Cliente registrado.
+
+**Objetivo:** Permitir que el cliente solicite la cancelación de una reserva propia.
+
+**Precondiciones:**
+- El cliente debe haber iniciado sesión.
+- Debe existir un turno asociado a su cuenta.
+- El turno debe encontrarse en un estado que permita su cancelación.
+
+**Flujo principal:**
+1. El cliente accede a la sección Mis turnos.
+2. Selecciona el turno que desea cancelar.
+3. El sistema muestra los detalles de la reserva.
+4. El cliente selecciona la opción Cancelar.
+5. El sistema solicita confirmar la acción.
+6. El cliente confirma la cancelación.
+7. El sistema actualiza el estado del turno a Cancelado.
+8. El sistema informa que la cancelación fue registrada.
+
+**Flujos alternativos:**
+- FA-01: Si el cliente decide no confirmar, el turno permanece sin modificaciones.
+- FA-02: Si el turno no cumple las condiciones de cancelación, el sistema informa que no puede cancelarse.
+- FA-03: Si la reserva no pertenece al cliente autenticado, el sistema impide la operación.
+
+**Postcondiciones:**
+- El turno queda registrado como cancelado.
+- El administrador puede visualizar la modificación.
+- El horario no se habilita automáticamente; el administrador decide si lo libera.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-09. Gestionar turnos desde el panel administrativo
+
+**Actor principal:** Administrador.
+
+**Objetivo:** Permitir que el administrador consulte y gestione las reservas registradas en el sistema.
+
+**Precondiciones:**
+- El administrador debe haber iniciado sesión.
+- Debe contar con permisos de gestión de turnos.
+
+**Flujo principal:**
+1. El administrador ingresa al panel administrativo.
+2. Accede a la sección de agenda.
+3. El sistema muestra los turnos registrados.
+4. El administrador filtra las reservas por fecha, profesional o servicio.
+5. Selecciona un turno para consultar sus detalles.
+6. El administrador puede modificar o cancelar la reserva.
+7. El sistema registra los cambios realizados.
+
+**Flujos alternativos:**
+- FA-01: Si no existen reservas para los filtros seleccionados, el sistema muestra un mensaje informativo.
+- FA-02: Si el administrador intenta realizar una modificación no permitida, el sistema informa que la operación no puede completarse.
+
+**Postcondiciones:**
+- La información de las reservas queda actualizada.
+- Los cambios realizados quedan registrados.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-10. Verificar señas y confirmar reservas
+
+**Actor principal:** Administrador.
+
+**Objetivo:** Permitir que el administrador verifique los pagos de las señas y confirme las reservas correspondientes.
+
+**Precondiciones:**
+- El administrador debe haber iniciado sesión.
+- Deben existir reservas pendientes de verificación.
+- Los clientes deben haber adjuntado sus comprobantes.
+
+**Flujo principal:**
+1. El administrador ingresa al panel administrativo.
+2. Accede a la sección de señas pendientes.
+3. El sistema muestra las reservas con comprobantes recibidos.
+4. El administrador selecciona una reserva.
+5. Consulta los datos del turno y el comprobante adjunto.
+6. Verifica en su cuenta bancaria que el dinero haya sido acreditado.
+7. El administrador marca el pago como verificado.
+8. El sistema actualiza el estado de la reserva a Confirmado.
+9. El sistema registra la operación y notifica al cliente.
+
+**Flujos alternativos:**
+- FA-01: Si el dinero no fue acreditado, el administrador rechaza la verificación y registra el resultado.
+- FA-02: Si el comprobante es incorrecto o ilegible, el administrador informa que debe corregirse.
+- FA-03: Si la reserva ya no se encuentra pendiente de verificación, el sistema impide confirmar nuevamente el pago.
+
+**Postcondiciones:**
+- La seña queda registrada como verificada o rechazada.
+- La reserva actualiza su estado según el resultado.
+- La operación queda registrada para su seguimiento.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-11. Gestionar servicios y profesionales
+
+**Actor principal:** Administrador.
+
+**Objetivo:** Permitir que el administrador gestione el catálogo de servicios y los profesionales del centro de estética.
+
+**Precondiciones:**
+- El administrador debe haber iniciado sesión.
+- Debe contar con permisos de gestión.
+
+**Flujo principal:**
+1. El administrador ingresa al panel administrativo.
+2. Accede a la sección de servicios o profesionales.
+3. El sistema muestra los registros existentes.
+4. El administrador selecciona una operación: registrar, modificar o deshabilitar.
+5. El sistema solicita los datos correspondientes.
+6. El administrador completa o modifica la información.
+7. El sistema valida los datos ingresados.
+8. El sistema guarda los cambios.
+
+**Flujos alternativos:**
+- FA-01: Si faltan datos obligatorios, el sistema solicita completarlos.
+- FA-02: Si la información ingresada no cumple las validaciones, el sistema informa los errores.
+- FA-03: Si un servicio o profesional está asociado a reservas existentes, el sistema conserva los registros históricos y evita su eliminación física cuando pueda afectar la integridad de los datos.
+
+**Postcondiciones:**
+- Los servicios y profesionales quedan registrados o actualizados.
+- Los elementos deshabilitados dejan de ofrecerse para nuevas reservas.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-12. Gestionar horarios disponibles
+
+**Actor principal:** Administrador.
+
+**Objetivo:** Permitir que el administrador configure y modifique los horarios de atención y la disponibilidad de los profesionales.
+
+**Precondiciones:**
+- El administrador debe haber iniciado sesión.
+- El profesional debe encontrarse registrado y habilitado.
+
+**Flujo principal:**
+1. El administrador ingresa al panel administrativo.
+2. Accede a la gestión de horarios.
+3. Selecciona un profesional.
+4. Configura los días y horarios de atención.
+5. Define los períodos de disponibilidad y los bloqueos necesarios.
+6. El sistema valida que la configuración no genere conflictos con reservas existentes.
+7. El administrador confirma los cambios.
+8. El sistema guarda la nueva disponibilidad.
+
+**Flujos alternativos:**
+- FA-01: Si existe un conflicto con un turno reservado, el sistema informa la situación y evita modificar la disponibilidad de manera que afecte esa reserva.
+- FA-02: Si los horarios ingresados son incorrectos, el sistema solicita corregirlos.
+
+**Postcondiciones:**
+- La disponibilidad queda actualizada.
+- Los clientes pueden consultar los nuevos horarios habilitados.
+
+**Prioridad:** Alta.
+
+---
+
+### CU-13. Publicar horarios de último momento
+
+**Actor principal:** Administrador.
+
+**Objetivo:** Permitir que el administrador vuelva a habilitar un horario disponible y lo destaque como una oportunidad de último momento.
+
+**Precondiciones:**
+- El administrador debe haber iniciado sesión.
+- Debe existir un horario que pueda volver a habilitarse.
+- El horario no debe tener otra reserva activa.
+
+**Flujo principal:**
+1. El administrador ingresa al panel administrativo.
+2. Consulta los horarios bloqueados o liberados.
+3. Selecciona un horario que desea volver a ofrecer.
+4. El sistema verifica que no exista una reserva activa.
+5. El administrador habilita la disponibilidad.
+6. Selecciona la opción de publicar como último momento.
+7. El sistema actualiza la disponibilidad y destaca el horario en el sitio web.
+8. Los clientes pueden visualizarlo y solicitar una reserva.
+
+**Flujos alternativos:**
+- FA-01: Si el horario ya fue reservado, el sistema impide volver a publicarlo.
+- FA-02: Si el administrador decide no publicar el horario, puede mantenerlo bloqueado.
+- FA-03: Si el horario deja de estar disponible, el sistema deja de mostrarlo como oportunidad de último momento.
+
+**Postcondiciones:**
+- El horario queda habilitado o permanece bloqueado según la decisión administrativa.
+- Si se publica, aparece destacado como disponibilidad de último momento.
+- No se muestran datos personales ni información de la reserva anterior.
+
+**Prioridad:** Media.
+
+## 5. Consideraciones finales
+
+Los casos de uso definidos representan la primera versión de las principales interacciones del sistema SteticOnline.
+
+Estos escenarios servirán como referencia para el diseño de interfaces, la definición de rutas y controladores, la implementación de las reglas de negocio y la elaboración de pruebas funcionales.
+
+Durante las etapas posteriores podrán incorporarse ajustes o nuevos escenarios según las necesidades detectadas.
