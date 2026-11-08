@@ -1,0 +1,176 @@
+# 04. Arquitectura del sistema
+
+## 1. Objetivo del documento
+
+Este documento describe la arquitectura inicial de SteticOnline. Define los componentes principales del sistema, sus responsabilidades y la forma en que se comunicarán.
+
+La arquitectura servirá como guía para organizar el desarrollo y mantener separadas las responsabilidades de la interfaz, la lógica del negocio y el almacenamiento de datos.
+
+## 2. Estilo arquitectónico
+
+SteticOnline utilizará una arquitectura cliente-servidor con separación entre frontend y backend.
+
+Se organizará en tres capas principales:
+
+1. **Presentación (frontend):** muestra las pantallas y permite que clientes y personal interactúen con el sistema.
+2. **Lógica de negocio (backend):** recibe las solicitudes, valida los datos, aplica las reglas del negocio y controla los permisos.
+3. **Datos (base de datos):** almacena de forma persistente la información del sistema.
+
+El frontend y el backend se comunicarán mediante una API REST que intercambiará información en formato JSON.
+
+## 3. Componentes principales
+
+### 3.1. Frontend
+
+Tecnologías previstas: HTML5, CSS3 y JavaScript.
+
+Será responsable de:
+
+- Mostrar el catálogo de servicios y profesionales.
+- Permitir consultar fechas y horarios disponibles.
+- Presentar los formularios para solicitar y cancelar turnos.
+- Permitir adjuntar el comprobante de seña cuando corresponda.
+- Mostrar al cliente sus próximos turnos y su historial.
+- Proporcionar las pantallas del panel administrativo según el rol y los permisos del usuario.
+- Enviar solicitudes a la API y mostrar las respuestas o mensajes de validación.
+
+El frontend no será responsable de decidir si un horario está realmente disponible ni de confirmar una reserva por su cuenta. Esas decisiones deberán validarse en el backend.
+
+### 3.2. Backend
+
+Tecnología prevista: PHP con Laravel.
+
+Será responsable de:
+
+- Exponer los endpoints de la API REST.
+- Validar los datos recibidos.
+- Gestionar usuarios, autenticación, roles y permisos.
+- Consultar y administrar servicios, profesionales y horarios.
+- Calcular y verificar la disponibilidad de turnos.
+- Registrar reservas y evitar superposiciones de horarios.
+- Gestionar los estados de las reservas y el proceso de señas.
+- Aplicar las reglas de cancelación y liberación de horarios.
+- Registrar las acciones administrativas importantes.
+- Comunicarse con la base de datos.
+
+El backend será la fuente confiable para las reglas del negocio. Aunque el frontend realice validaciones para mejorar la experiencia, el servidor deberá repetir las validaciones necesarias antes de guardar cambios.
+
+### 3.3. Base de datos
+
+Tecnología prevista: MySQL.
+
+Almacenará la información necesaria para el funcionamiento del sistema, entre ella:
+
+- Usuarios, roles y permisos.
+- Clientes y datos de contacto.
+- Profesionales.
+- Servicios y duración de cada servicio.
+- Horarios y disponibilidad de los profesionales.
+- Turnos y sus estados.
+- Señas y comprobantes asociados a las reservas.
+- Registro de acciones administrativas.
+
+El diseño detallado de tablas, relaciones y claves se desarrollará en el documento **05. Modelo de datos**.
+
+### 3.4. API REST
+
+La API será el medio de comunicación entre el frontend y el backend.
+
+- El frontend enviará solicitudes HTTP.
+- Laravel recibirá las solicitudes mediante rutas y controladores.
+- El backend ejecutará las validaciones y reglas correspondientes.
+- Cuando sea necesario, consultará o actualizará la base de datos.
+- Finalmente, responderá con datos JSON y un código de estado HTTP adecuado.
+
+Los endpoints, métodos HTTP, parámetros y respuestas se especificarán en el documento **06. Diseño de la API**.
+
+## 4. Actores y acceso al sistema
+
+El sistema contemplará distintos tipos de usuarios:
+
+- **Cliente:** podrá consultar servicios, profesionales y disponibilidad, reservar y gestionar sus propios turnos.
+- **Profesional:** podrá consultar la información de los turnos que tenga asignados, de acuerdo con los permisos definidos.
+- **Administrador/a delegado/a:** podrá realizar las tareas operativas que le autorice la propietaria, como gestionar turnos y verificar señas.
+- **Propietaria:** tendrá acceso a la administración general, incluida la gestión de usuarios, roles y permisos.
+
+Los permisos se controlarán en el backend. Ocultar una opción en la interfaz no será suficiente para proteger una operación: cada solicitud deberá verificar que el usuario tenga autorización.
+
+## 5. Comunicación y flujo general
+
+El flujo general de una operación será:
+
+1. El usuario realiza una acción desde el frontend.
+2. JavaScript envía una solicitud HTTP a un endpoint de la API.
+3. Laravel recibe la solicitud y verifica la autenticación y los permisos cuando corresponda.
+4. El backend valida los datos y aplica las reglas del negocio.
+5. Si la operación requiere consultar o guardar información, Laravel interactúa con MySQL.
+6. El backend devuelve una respuesta JSON con el resultado.
+7. El frontend interpreta la respuesta y actualiza la pantalla.
+
+## 6. Consideraciones importantes de arquitectura
+
+### 6.1. Disponibilidad y reservas
+
+La disponibilidad se calculará y verificará en el backend. No se confiará únicamente en los horarios que muestre el navegador.
+
+Al registrar una reserva, el servidor deberá volver a comprobar que el horario siga disponible y proteger la operación para evitar que dos clientes obtengan el mismo turno para el mismo profesional y horario.
+
+### 6.2. Persistencia de la información
+
+Los turnos, usuarios, comprobantes y demás datos importantes se guardarán en MySQL. Cerrar el navegador o salir de la página no deberá eliminar una reserva registrada.
+
+### 6.3. Estados de las reservas y señas
+
+El backend administrará los estados definidos en los requerimientos: provisional, pendiente de verificación, confirmado, cancelado, vencido/liberado y finalizado.
+
+La disponibilidad del horario se manejará como una condición independiente del estado de la reserva, para poder aplicar correctamente las reglas de cancelación y liberación.
+
+### 6.4. Seguridad
+
+Se deberán contemplar, como mínimo:
+
+- Validación de datos en el servidor.
+- Autenticación para las operaciones que requieran una cuenta.
+- Autorización según roles y permisos.
+- Protección de rutas y endpoints administrativos.
+- Almacenamiento seguro de contraseñas mediante los mecanismos de Laravel.
+- Uso de HTTPS en el entorno publicado.
+- Protección de archivos y comprobantes para que solo accedan usuarios autorizados.
+
+## 7. Organización inicial del repositorio
+
+Se mantendrá la separación entre frontend y backend dentro del repositorio:
+
+```text
+steticonline/
+├── README.md
+├── docs/
+│   ├── 01-relevamiento.md
+│   ├── 02-requerimientos.md
+│   ├── 03-casos-de-uso.md
+│   ├── 04-arquitectura.md
+│   ├── 05-modelo-datos.md
+│   ├── 06-api.md
+│   └── 07-pruebas.md
+├── frontend/
+├── backend/
+└── tests/
+```
+
+Dentro de `backend/` se alojará el proyecto Laravel completo, respetando su estructura estándar. No se crearán manualmente las carpetas internas de Laravel antes de inicializar el proyecto.
+
+## 8. Decisiones pendientes
+
+Las siguientes decisiones se terminarán de definir durante el diseño y la implementación:
+
+- Mecanismo definitivo de autenticación y posible acceso mediante Google.
+- Política exacta de cancelación y devolución o pérdida de la seña.
+- Servicio y estrategia para enviar notificaciones.
+- Proveedor y configuración del hosting, dominio y certificado SSL.
+- Política de copias de seguridad y conservación de comprobantes.
+
+## 9. Resumen
+
+La arquitectura de SteticOnline separará la interfaz de usuario, la lógica del negocio y el almacenamiento de datos. El frontend se comunicará con Laravel mediante una API REST, y Laravel será responsable de validar las operaciones, aplicar las reglas del sistema y proteger la información almacenada en MySQL.
+
+Esta estructura permitirá desarrollar, probar y mantener cada componente de manera organizada.
