@@ -1,0 +1,297 @@
+# 05. Modelo de datos
+
+## 1. Objetivo
+
+El objetivo de este documento es identificar las entidades principales de SteticOnline, sus atributos y las relaciones necesarias para almacenar y organizar la información del sistema.
+
+El modelo de datos servirá como base para diseñar la base de datos MySQL y desarrollar posteriormente las migraciones y modelos de Laravel.
+
+## 2. Motor de base de datos
+
+Se utilizará MySQL como sistema gestor de base de datos relacional.
+
+La información se organizará en tablas relacionadas mediante claves primarias y claves foráneas, procurando mantener la integridad y evitar la duplicación innecesaria de datos.
+
+## 3. Entidades principales
+
+### 3.1. Usuarios
+
+Almacena los datos de las personas que tienen una cuenta en el sistema.
+
+Atributos principales:
+
+- id
+- nombre
+- apellido
+- email
+- teléfono
+- password
+- estado
+- created_at
+- updated_at
+
+El correo electrónico deberá ser único.
+
+Los clientes podrán reservar como invitados sin crear una cuenta. En ese caso, sus datos de contacto se guardarán directamente en el turno.
+
+Las profesionales también podrán tener una cuenta vinculada, pero no será obligatorio.
+
+### 3.2. Roles
+
+Define los perfiles de acceso al sistema.
+
+Atributos principales:
+
+- id
+- nombre
+- descripcion
+
+Roles iniciales:
+
+- Cliente
+- Profesional
+- Administrador delegado
+- Propietaria
+
+### 3.3. Permisos
+
+Define las acciones que pueden realizar los usuarios.
+
+Atributos principales:
+
+- id
+- nombre
+- descripcion
+
+Se utilizará una tabla intermedia para relacionar roles con permisos y otra para relacionar usuarios con roles.
+
+### 3.4. Profesionales
+
+Almacena la información laboral de las personas que realizan los servicios.
+
+Atributos principales:
+
+- id
+- user_id (opcional)
+- nombre
+- apellido
+- descripción
+- estado
+
+El campo user_id permitirá vincular una profesional con una cuenta de usuario. Será opcional y único para evitar que una cuenta quede vinculada a varias fichas profesionales.
+
+Una profesional podrá aparecer en el catálogo y recibir reservas aunque no tenga una cuenta para ingresar al panel.
+
+### 3.5. Servicios
+
+Almacena los tratamientos y servicios ofrecidos por el salón.
+
+Atributos principales:
+
+- id
+- nombre
+- descripción
+- duración
+- estado
+
+Ejemplos:
+
+- Manicuría.
+- Pestañas.
+- Depilación.
+- Alisados.
+
+El precio no se almacenará directamente en esta tabla, ya que podrá variar según la profesional que realice el servicio.
+
+### 3.6. Profesional_servicio
+
+Tabla intermedia que relaciona profesionales con los servicios que pueden realizar.
+
+También permitirá establecer el precio individual de cada servicio según la profesional.
+
+Atributos principales:
+
+- id
+- profesional_id
+- servicio_id
+- precio
+- estado
+
+La combinación profesional_id y servicio_id deberá ser única para evitar asociaciones duplicadas.
+
+Una profesional podrá ofrecer varios servicios y un servicio podrá ser realizado por varias profesionales.
+
+### 3.7. Horarios laborales
+
+Almacena los días y franjas horarias habituales de trabajo de cada profesional.
+
+Atributos principales:
+
+- id
+- profesional_id
+- dia_semana
+- hora_inicio
+- hora_fin
+- estado
+
+### 3.8. Excepciones de disponibilidad
+
+Permite registrar modificaciones puntuales de los horarios habituales.
+
+Ejemplos:
+
+- Vacaciones.
+- Licencias.
+- Días no laborables.
+- Bloqueos temporales.
+- Horarios especiales.
+
+Atributos principales:
+
+- id
+- profesional_id
+- fecha
+- hora_inicio (opcional)
+- hora_fin (opcional)
+- tipo
+- motivo
+
+### 3.9. Turnos
+
+Almacena las reservas realizadas por los clientes.
+
+Cada turno corresponderá a un único servicio y una única profesional.
+
+Atributos principales:
+
+- id
+- usuario_id (opcional, para reservas de invitados)
+- profesional_id
+- servicio_id
+- nombre_cliente
+- apellido_cliente
+- email_cliente
+- telefono_cliente
+- fecha_hora_inicio
+- fecha_hora_fin
+- precio_acordado
+- duracion_acordada
+- estado
+- created_at
+- updated_at
+
+El precio y la duración se guardarán como valores históricos al momento de realizar la reserva. De esta manera, los cambios posteriores en los precios o duración del servicio no modificarán los turnos anteriores.
+
+La combinación de profesional, fecha y horario deberá validarse para impedir reservas superpuestas.
+
+### 3.10. Señas
+
+Almacena la información relacionada con los pagos anticipados de los turnos.
+
+Atributos principales:
+
+- id
+- turno_id
+- importe
+- comprobante
+- fecha_envio
+- fecha_limite
+- estado
+- verificado_por (opcional)
+- fecha_verificacion (opcional)
+
+La verificación del pago será realizada manualmente por el personal autorizado en la primera versión del sistema.
+
+### 3.11. Registro de acciones
+
+Almacena las operaciones administrativas importantes realizadas dentro del sistema.
+
+Atributos principales:
+
+- id
+- usuario_id
+- accion
+- entidad_afectada
+- entidad_id
+- fecha_hora
+- detalle
+
+Permitirá consultar quién realizó una modificación y cuándo se efectuó.
+
+## 4. Relaciones entre entidades
+
+Las relaciones principales serán:
+
+- Un usuario puede tener varios roles y un rol puede pertenecer a varios usuarios.
+- Un rol puede tener varios permisos y un permiso puede estar asociado a varios roles.
+- Un usuario puede estar vinculado a una ficha profesional; esta vinculación es opcional.
+- Un profesional puede ofrecer varios servicios y un servicio puede ser ofrecido por varios profesionales.
+- Un profesional puede tener varios horarios laborales.
+- Un profesional puede registrar varias excepciones de disponibilidad.
+- Un cliente puede tener varios turnos.
+- Un profesional puede atender varios turnos.
+- Un servicio puede estar asociado a varios turnos.
+- Cada turno corresponderá a un único servicio.
+- Un turno podrá tener una seña asociada.
+- Un usuario podrá generar varios registros de acciones administrativas.
+
+## 5. Reglas de integridad
+
+Se deberán contemplar las siguientes reglas:
+
+- Los identificadores principales serán claves primarias.
+- Las relaciones entre tablas se implementarán mediante claves foráneas.
+- La combinación de profesional y servicio no podrá repetirse en la tabla profesional_servicio.
+- No se permitirá reservar dos turnos superpuestos para un mismo profesional.
+- Un profesional solamente podrá recibir reservas de servicios que tenga asociados y habilitados.
+- Los horarios deberán validarse en el backend antes de registrar una reserva.
+- Los usuarios registrados tendrán un correo electrónico único.
+- Los turnos conservarán sus datos históricos aunque posteriormente cambien los precios o la duración de los servicios.
+- Los registros importantes no deberán eliminarse físicamente cuando sea necesario conservar su historial.
+
+## 6. Consideraciones sobre reservas de invitados
+
+El sistema permitirá reservar sin crear una cuenta.
+
+En esos casos, el campo usuario_id del turno podrá quedar vacío y se almacenarán los datos de contacto del cliente directamente en el registro de la reserva.
+
+De esta manera, la reserva no dependerá de que el cliente complete un registro previo.
+
+## 7. Consideraciones sobre disponibilidad
+
+Los horarios habituales de los profesionales se almacenarán por separado de las reservas.
+
+La disponibilidad efectiva se determinará teniendo en cuenta:
+
+- Horarios laborales.
+- Excepciones de disponibilidad.
+- Duración del servicio.
+- Turnos existentes.
+- Estados de las reservas.
+- Servicios habilitados para cada profesional.
+
+La comprobación definitiva se realizará en el backend para evitar reservas duplicadas.
+
+## 8. Decisiones definidas
+
+Para la primera versión del sistema se establecen las siguientes decisiones:
+
+- Cada turno permitirá reservar un único servicio.
+- El precio será individual y podrá variar según la profesional.
+- Las profesionales podrán tener una cuenta de usuario, pero no será obligatorio.
+- Los clientes podrán reservar como invitados.
+- Los precios y duraciones acordados se conservarán en cada turno como información histórica.
+
+## 9. Decisiones pendientes
+
+Antes de implementar las migraciones será necesario definir:
+
+- Si cada profesional podrá establecer una duración diferente para un mismo servicio.
+- La política definitiva de cancelación.
+- Las condiciones de devolución o pérdida de la seña.
+- La duración de la retención provisional del horario.
+- El tratamiento de los comprobantes y su conservación.
+
+## 10. Próxima etapa
+
+Una vez revisado y aprobado el modelo de datos, se avanzará con el diseño de la API REST, definiendo los endpoints, métodos HTTP, parámetros y respuestas que permitirán la comunicación entre el frontend y el backend.
